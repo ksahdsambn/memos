@@ -15,7 +15,7 @@ concurrency:
 jobs:
   lint:
     name: Lint Protos
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -38,3 +38,4 @@ jobs:
             echo "❌ Proto files are not formatted. Run 'buf format -w' to fix."
             exit 1
           fi
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}

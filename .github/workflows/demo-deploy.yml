@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy-demo:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     steps:
       - name: Trigger Render Deploy
         run: |
@@ -15,3 +15,4 @@ jobs:
 
       - name: Deployment Status
         run: echo "Demo deployment triggered successfully on Render"
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}

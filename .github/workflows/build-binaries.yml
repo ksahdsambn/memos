@@ -22,7 +22,7 @@ jobs:
   # - For branches: use branch-name-shortSHA format
   prepare:
     name: Extract Version
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -51,10 +51,11 @@ jobs:
   # - Builds React frontend with Vite
   # - Produces static files that will be embedded in Go binary
   # - Shared across all platform builds
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
   build-frontend:
     name: Build Frontend
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -103,10 +104,11 @@ jobs:
   # - Embeds frontend assets built in previous job
   # - Produces static binaries with no external dependencies
   # - Packages as tar.gz (Unix) or zip (Windows)
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
   build-binaries:
     name: Build ${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm && format('v{0}', matrix.goarm) || '' }}
     needs: [prepare, build-frontend]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     strategy:
       fail-fast: false
       matrix:
@@ -209,11 +211,12 @@ jobs:
   # Job 4: Upload artifacts to GitHub Release
   # - Only runs when triggered by a release publish event
   # - Downloads all built artifacts and attaches them to the release
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
   release:
     name: Upload Release Assets
     needs: build-binaries
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'release') && ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     permissions:
       contents: write
     steps:

@@ -20,11 +20,11 @@ env:
 jobs:
   static-checks:
     name: Static Checks
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
@@ -43,9 +43,10 @@ jobs:
           version: v2.4.0
           args: --timeout=3m
 
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
   tests:
     name: Tests (${{ matrix.test-group }})
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, dartnode-linux, dartnode-build]
     strategy:
       fail-fast: false
       matrix:
@@ -53,7 +54,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
@@ -89,3 +90,4 @@ jobs:
           files: ./coverage.out
           flags: ${{ matrix.test-group }}
           fail_ci_if_error: false
+    if: ${{ ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) }}
